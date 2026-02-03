@@ -1,9 +1,11 @@
-iport React from "react";
-import { GovernancePanel } from "../admin-center/GovernancePanel";
-import { ModuleManager } from "../admin-center/ModuleManager";
-import { ROIChart } from "../dashboards/ROIChart";
+import React from "react";
 import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
 import { DecisionInbox } from "./DecisionInbox";
+
+import { ModuleManager } from "../admin-center/ModuleManager";
+import { GovernancePanel } from "../admin-center/GovernancePanel";
+
+import { ROIChart } from "../dashboards/ROIChart";
 import { PriorityChart } from "../dashboards/PriorityChart";
 
 export const App = () => {
@@ -58,27 +60,33 @@ export const App = () => {
           overflowY: "auto",
         }}
       >
+        {/* Workspace Context */}
+        <WorkspaceSwitcher />
+
+        {/* Header */}
         <h1 style={{ marginBottom: 6 }}>Chief of Staff Brief</h1>
         <p style={{ color: "#475569", marginBottom: 24 }}>
           What needs your attention today
         </p>
-         <WorkspaceSwitcher />
 
         {/* Decision Inbox */}
         <DecisionInbox />
 
-        {/* Charts */}
-         <div style={{ marginTop: 32 }}>
-             <ModuleManager />
-         </div>
-         <div style={{ marginTop: 32 }}>
-              <ROIChart />
-         </div>
-         <div style={{ marginTop: 32 }}>
-               <GovernancePanel />
-         </div>
+        {/* Insights & Controls */}
         <div style={{ marginTop: 32 }}>
           <PriorityChart />
+        </div>
+
+        <div style={{ marginTop: 32 }}>
+          <ROIChart />
+        </div>
+
+        <div style={{ marginTop: 32 }}>
+          <ModuleManager />
+        </div>
+
+        <div style={{ marginTop: 32 }}>
+          <GovernancePanel />
         </div>
       </main>
     </div>
