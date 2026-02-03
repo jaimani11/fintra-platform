@@ -1,4 +1,5 @@
-import React from "react";
+iport React from "react";
+import { GovernancePanel } from "../admin-center/GovernancePanel";
 import { ModuleManager } from "../admin-center/ModuleManager";
 import { ROIChart } from "../dashboards/ROIChart";
 import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
@@ -72,6 +73,9 @@ export const App = () => {
          </div>
          <div style={{ marginTop: 32 }}>
               <ROIChart />
+         </div>
+         <div style={{ marginTop: 32 }}>
+               <GovernancePanel />
          </div>
         <div style={{ marginTop: 32 }}>
           <PriorityChart />
