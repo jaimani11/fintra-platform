@@ -1,4 +1,6 @@
 import React from "react";
+import { ModuleManager } from "../admin-center/ModuleManager";
+import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
 import { DecisionInbox } from "./DecisionInbox";
 import { PriorityChart } from "../dashboards/PriorityChart";
 
@@ -58,11 +60,15 @@ export const App = () => {
         <p style={{ color: "#475569", marginBottom: 24 }}>
           What needs your attention today
         </p>
+         <WorkspaceSwitcher />
 
         {/* Decision Inbox */}
         <DecisionInbox />
 
         {/* Charts */}
+         <div style={{ marginTop: 32 }}>
+             <ModuleManager />
+         </div>
         <div style={{ marginTop: 32 }}>
           <PriorityChart />
         </div>
