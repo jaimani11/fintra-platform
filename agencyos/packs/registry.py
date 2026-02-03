@@ -1,4 +1,5 @@
 from agencyos.packs.cash_collections import CashCollectionsPack
+from agencyos.packs.sales_tax_pack import SalesTaxPack
 from agencyos.packs.spend_leakage import SpendLeakagePack
 from agencyos.packs.month_end_close import MonthEndClosePack
 from agencyos.packs.payroll_exceptions import PayrollExceptionsPack
@@ -20,4 +21,5 @@ PACKS = [
     MarginUnitEconomicsPack(),
     InventoryIntelPack(),
     ReputationRecoveryPack(),
+    SalesTaxPack()
 ]

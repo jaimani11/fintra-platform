@@ -1,0 +1,18 @@
+openapi: 3.0.0
+info:
+  title: Sales Tax Module API
+  version: 1.0.0
+
+paths:
+  /analyze:
+    post:
+      summary: Analyze sales tax remittance
+      parameters:
+        - name: org_id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Analysis result
