@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
+from agencyos.decision_engine.outcome_models import DecisionROI
+Decision.roi = None
 
 @dataclass
 class Decision:

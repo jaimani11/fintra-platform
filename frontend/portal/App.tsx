@@ -1,5 +1,6 @@
 import React from "react";
 import { ModuleManager } from "../admin-center/ModuleManager";
+import { ROIChart } from "../dashboards/ROIChart";
 import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
 import { DecisionInbox } from "./DecisionInbox";
 import { PriorityChart } from "../dashboards/PriorityChart";
@@ -68,6 +69,9 @@ export const App = () => {
         {/* Charts */}
          <div style={{ marginTop: 32 }}>
              <ModuleManager />
+         </div>
+         <div style={{ marginTop: 32 }}>
+              <ROIChart />
          </div>
         <div style={{ marginTop: 32 }}>
           <PriorityChart />

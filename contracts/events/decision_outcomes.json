@@ -1,0 +1,7 @@
+{
+  "decision_id": "string",
+  "approved_by": "string",
+  "estimated_savings_cents": "number",
+  "realized_savings_cents": "number",
+  "timestamp": "iso8601"
+}
