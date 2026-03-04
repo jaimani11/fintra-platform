@@ -1,0 +1,55 @@
+total 24
+drwxr-xr-x@ 2 jaideepmanwani  staff   64 Feb  3 01:00 audit
+drwxr-xr-x@ 3 jaideepmanwani  staff   96 Feb  3 01:15 api-gateway
+drwxr-xr-x@ 4 jaideepmanwani  staff  128 Feb  3 01:15 orgs
+drwxr-xr-x@ 3 jaideepmanwani  staff   96 Feb  3 01:16 billing
+drwxr-xr-x@ 5 jaideepmanwani  staff  160 Feb  3 02:21 licensing
+drwxr-xr-x@ 5 jaideepmanwani  staff  160 Feb  3 02:29 governance
+drwxr-xr-x@ 2 jaideepmanwani  staff   64 Feb 11 00:26 decision_memory
+-rw-r--r--@ 1 jaideepmanwani  staff  246 Feb 11 00:26 models.py
+-rw-r--r--@ 1 jaideepmanwani  staff  406 Feb 11 00:58 scoring.py
+-rw-r--r--@ 1 jaideepmanwani  staff  218 Feb 12 01:26 main.py
+drwxr-xr-x@ 3 jaideepmanwani  staff   96 Feb 12 02:19 decisions
+drwxr-xr-x@ 5 jaideepmanwani  staff  160 Feb 12 02:21 auth
+-rw-r--r--  1 jaideepmanwani  staff    0 Feb 24 18:18 aaa
+
+./audit:
+total 0
+
+./api-gateway:
+total 8
+-rw-r--r--@ 1 jaideepmanwani  staff  615 Feb  3 01:15 module_registry.py
+
+./orgs:
+total 16
+-rw-r--r--@ 1 jaideepmanwani  staff  392 Feb  3 01:13 models.py
+-rw-r--r--@ 1 jaideepmanwani  staff  458 Feb  3 01:15 module_access.py
+
+./billing:
+total 8
+-rw-r--r--@ 1 jaideepmanwani  staff  150 Feb  3 01:16 pricing.py
+
+./licensing:
+total 24
+-rw-r--r--@ 1 jaideepmanwani  staff  248 Feb  3 01:14 seat_manager.py
+-rw-r--r--@ 1 jaideepmanwani  staff  155 Feb  3 02:20 models.py
+-rw-r--r--@ 1 jaideepmanwani  staff  114 Feb  3 02:21 service.py
+
+./governance:
+total 24
+-rw-r--r--@ 1 jaideepmanwani  staff   92 Feb  3 02:29 config.py
+-rw-r--r--@ 1 jaideepmanwani  staff  360 Feb  3 02:29 hasher.py
+-rw-r--r--@ 1 jaideepmanwani  staff  210 Feb  3 02:29 blockchain.py
+
+./decision_memory:
+total 0
+
+./decisions:
+total 8
+-rw-r--r--@ 1 jaideepmanwani  staff  3571 Feb 12 02:19 routes.py
+
+./auth:
+total 24
+-rw-r--r--@ 1 jaideepmanwani  staff  263 Feb  3 01:14 roles.py
+-rw-r--r--@ 1 jaideepmanwani  staff  390 Feb 12 01:43 jwt.tsx
+-rw-r--r--@ 1 jaideepmanwani  staff  164 Feb 12 02:21 dependencies.py
