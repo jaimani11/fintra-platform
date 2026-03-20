@@ -41,6 +41,7 @@ npm install jspdf
 npm install zustand
 npm install zustand recharts react-router-dom
 npm install react-router-dom
+chmod +x node_modules/.bin/vite
 npm run dev
 
 Local: http://localhost:5173
