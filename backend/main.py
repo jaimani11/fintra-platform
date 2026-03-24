@@ -21,7 +21,20 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
+# --------------------------------------------------
+# sprint 3 work in progress
+# --------------------------------------------------
+def compliance_limit(investor_type: str, amount: float):
+    REG_CF_MAX = 2000.0 # random threshold
+    if investor_type == "non accredited" and amount > REG_CF_MAX:
+        return {
+            "signal": "Red flag", "rule": "Reg CF limit past", "action": "Put into audit trail"
+        }
+    return {"signal": "Green", "rule": "Compliant"}
+    
+@app.get("/compliance/signal")
+def compliance_signal(status: str = "non accredited", amout: float = 0.0):
+    return compliance_limit(status, amount)
 # --------------------------------------------------
 # Root Health Check
 # --------------------------------------------------
