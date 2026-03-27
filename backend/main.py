@@ -25,15 +25,17 @@ app.add_middleware(
 # sprint 3 work in progress
 # --------------------------------------------------
 def compliance_limit(investor_type: str, amount: float):
+    if amount < 0:
+        return {"signal": "error", "message": "amount cant be negative"}
     REG_CF_MAX = 2000.0 # random threshold
-    if investor_type == "non accredited" and amount > REG_CF_MAX:
+    if investor_type.lower() == "non accredited" and amount > REG_CF_MAX:
         return {
             "signal": "Red flag", "rule": "Reg CF limit past", "action": "Put into audit trail"
         }
     return {"signal": "Green", "rule": "Compliant"}
     
 @app.get("/compliance/signal")
-def compliance_signal(status: str = "non accredited", amout: float = 0.0):
+def compliance_signal(status: str = "non accredited", amount: float = 0.0):
     return compliance_limit(status, amount)
 # --------------------------------------------------
 # Root Health Check
