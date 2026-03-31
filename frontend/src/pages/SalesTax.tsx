@@ -1,22 +1,51 @@
+import { useEffect, useState } from "react";
 import { Card } from "../components/Card";
+import { useFinancialStore } from "../store/useFinancialStore";
+
+interface NexusState {
+  state: string;
+  revenue: number;
+  threshold: number;
+  status: "Safe" | "Approaching" | "Active";
+}
 
 export default function SalesTax() {
-  // Hardcoded revenue & thresholds
-  const nexusStates = [
-    { state: "California", revenue: 120000, threshold: 100000 },
-    { state: "New York", revenue: 85000, threshold: 100000 },
-    { state: "Texas", revenue: 480000, threshold: 500000 }, 
-  ];
+  const { addNotification } = useFinancialStore();
+  const [nexusStates, setNexusStates] = useState<NexusState[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Calculate status dynamically
-  const calculatedStates = nexusStates.map((item) => {
-    let status: "Active" | "Approaching" | "Safe";
-    if (item.revenue >= item.threshold) status = "Active";
-    else if (item.revenue >= item.threshold * 0.9) status = "Approaching";
-    else status = "Safe";
+  // Fetch backend data
+  useEffect(() => {
+    async function fetchNexusData() {
+      try {
+        const response = await fetch("/api/sales_tax"); // Backend endpoint
+        if (!response.ok) throw new Error("Failed to fetch sales tax data");
+        const data: NexusState[] = await response.json();
+        setNexusStates(data);
 
-    return { ...item, status };
-  });
+        // Trigger notifications for Active/Approaching states
+        data.forEach((state) => {
+          if (state.status === "Active" || state.status === "Approaching") {
+            addNotification({
+              id: `nexus-${state.state}`,
+              type: state.status === "Active" ? "CRITICAL" : "INFO",
+              message: `${state.state} is ${state.status} for economic nexus!`,
+            });
+          }
+        });
+
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchNexusData();
+  }, [addNotification]);
+
+  // Loading state
+  if (loading) return <div>Loading Sales Tax Data...</div>;
 
   return (
     <div className="space-y-8">
@@ -24,8 +53,8 @@ export default function SalesTax() {
 
       <div className="grid grid-cols-3 gap-6">
         <Card label="Tax Collected (YTD)" value="$42,390" />
-        <Card label="Active Jurisdictions" value="14" />
-        <Card label="Pending Filings" value="3" />
+        <Card label="Active Jurisdictions" value={nexusStates.filter(s => s.status === "Active").length.toString()} />
+        <Card label="Pending Filings" value={nexusStates.filter(s => s.status === "Approaching").length.toString()} />
       </div>
 
       <div className="bg-[#161a22] rounded-2xl border border-zinc-800 overflow-hidden">
@@ -42,20 +71,16 @@ export default function SalesTax() {
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-800">
-            {calculatedStates.map((item) => (
+            {nexusStates.map((item) => (
               <tr key={item.state} className="text-sm">
                 <td className="px-6 py-4 text-white font-medium">{item.state}</td>
                 <td className="px-6 py-4 text-zinc-300">${item.revenue.toLocaleString()}</td>
                 <td className="px-6 py-4">
-                  <span
-                    className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
-                      item.status === "Active"
-                        ? "bg-rose-500/20 text-rose-400"
-                        : item.status === "Approaching"
-                        ? "bg-amber-500/20 text-amber-400"
-                        : "bg-zinc-800 text-zinc-400"
-                    }`}
-                  >
+                  <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
+                    item.status === 'Active' ? 'bg-rose-500/20 text-rose-400' :
+                    item.status === 'Approaching' ? 'bg-amber-500/20 text-amber-400' :
+                    'bg-zinc-800 text-zinc-400'
+                  }`}>
                     {item.status}
                   </span>
                 </td>
