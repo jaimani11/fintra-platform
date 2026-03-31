@@ -1,61 +1,22 @@
-import { useEffect, useState } from "react";
 import { Card } from "../components/Card";
-
-interface NexusState {
-  state: string;
-  revenue: number;
-  threshold: number;
-  status: "Active" | "Approaching" | "Safe" | "Error";
-}
 
 export default function SalesTax() {
   // Hardcoded revenue & thresholds
-  const [nexusStates, setNexusStates] = useState<NexusState[]>([
-    { state: "California", revenue: 120000, threshold: 100000, status: "Safe" },
-    { state: "New York", revenue: 95000, threshold: 100000, status: "Safe" },
-    { state: "Texas", revenue: 480000, threshold: 500000, status: "Safe" }, 
-  ]);
+  const nexusStates = [
+    { state: "California", revenue: 120000, threshold: 100000 },
+    { state: "New York", revenue: 95000, threshold: 100000 },
+    { state: "Texas", revenue: 480000, threshold: 500000 },
+  ];
 
-  // Fetch backend analysis to determine status
-  useEffect(() => {
-    async function fetchStatus() {
-      const updatedStates = await Promise.all(
-        nexusStates.map(async (s) => {
-          try {
-            const res = await fetch("/api/analyze", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                org_id: "ORG001",
-                jurisdiction: s.state,
-                period_start: "2026-01-01",
-                period_end: "2026-03-31",
-                tax_collected: s.revenue * 0.1, // placeholder
-                tax_remitted: s.revenue * 0.08, // placeholder
-                total_sales: s.revenue,
-                transaction_count: 50, // placeholder
-              }),
-            });
+  // Calculate status dynamically
+  const calculatedStates = nexusStates.map((item) => {
+    let status: "Active" | "Approaching" | "Safe";
+    if (item.revenue >= item.threshold) status = "Active";
+    else if (item.revenue >= item.threshold * 0.9) status = "Approaching";
+    else status = "Safe";
 
-            const data = await res.json();
-
-            // Determine status from backend issues/warnings
-            let status: "Active" | "Approaching" | "Safe" | "Error" = "Safe";
-            if (data.issues && data.issues.length > 0) status = "Active";
-            else if (data.warnings && data.warnings.length > 0) status = "Approaching";
-
-            return { ...s, status };
-          } catch (err) {
-            return { ...s, status: "Error" };
-          }
-        })
-      );
-
-      setNexusStates(updatedStates);
-    }
-
-    fetchStatus();
-  }, []);
+    return { ...item, status };
+  });
 
   return (
     <div className="space-y-8">
@@ -81,7 +42,7 @@ export default function SalesTax() {
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-800">
-            {nexusStates.map((item) => (
+            {calculatedStates.map((item) => (
               <tr key={item.state} className="text-sm">
                 <td className="px-6 py-4 text-white font-medium">{item.state}</td>
                 <td className="px-6 py-4 text-zinc-300">${item.revenue.toLocaleString()}</td>
@@ -92,9 +53,7 @@ export default function SalesTax() {
                         ? "bg-rose-500/20 text-rose-400"
                         : item.status === "Approaching"
                         ? "bg-amber-500/20 text-amber-400"
-                        : item.status === "Safe"
-                        ? "bg-zinc-800 text-zinc-400"
-                        : "bg-red-600/20 text-red-500"
+                        : "bg-zinc-800 text-zinc-400"
                     }`}
                   >
                     {item.status}
