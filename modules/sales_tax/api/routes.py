@@ -6,10 +6,11 @@ from modules.sales_tax.logic.analyzer import (
     economic_nexus_trigger,
     economic_nexus_warning
 )
-from modules.sales_tax.logic.rules import NEXUS_RULES
+from modules.sales_tax.logic.rules import NEXUS_RULES  # For thresholds
 
 router = APIRouter()
 
+# Existing POST endpoint (unchanged)
 @router.post("/analyze")
 def analyze_tax(
     org_id: str,
@@ -65,6 +66,7 @@ def get_sales_tax_table():
 
     result = []
     for record in mock_records:
+        # Determine status
         if economic_nexus_trigger(record):
             status = "Active"
         elif economic_nexus_warning(record):
