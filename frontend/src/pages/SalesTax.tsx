@@ -1,51 +1,61 @@
 import { useEffect, useState } from "react";
 import { Card } from "../components/Card";
-import { useFinancialStore } from "../store/useFinancialStore";
 
 interface NexusState {
   state: string;
   revenue: number;
   threshold: number;
-  status: "Safe" | "Approaching" | "Active";
+  status: "Active" | "Approaching" | "Safe" | "Error";
 }
 
 export default function SalesTax() {
-  const { addNotification } = useFinancialStore();
-  const [nexusStates, setNexusStates] = useState<NexusState[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Hardcoded revenue & thresholds
+  const [nexusStates, setNexusStates] = useState<NexusState[]>([
+    { state: "California", revenue: 120000, threshold: 100000, status: "Safe" },
+    { state: "New York", revenue: 95000, threshold: 100000, status: "Safe" },
+    { state: "Texas", revenue: 480000, threshold: 500000, status: "Safe" }, 
+  ]);
 
-  // Fetch backend data
+  // Fetch backend analysis to determine status
   useEffect(() => {
-    async function fetchNexusData() {
-      try {
-        const response = await fetch("/api/sales_tax"); // Backend endpoint
-        if (!response.ok) throw new Error("Failed to fetch sales tax data");
-        const data: NexusState[] = await response.json();
-        setNexusStates(data);
-
-        // Trigger notifications for Active/Approaching states
-        data.forEach((state) => {
-          if (state.status === "Active" || state.status === "Approaching") {
-            addNotification({
-              id: `nexus-${state.state}`,
-              type: state.status === "Active" ? "CRITICAL" : "INFO",
-              message: `${state.state} is ${state.status} for economic nexus!`,
+    async function fetchStatus() {
+      const updatedStates = await Promise.all(
+        nexusStates.map(async (s) => {
+          try {
+            const res = await fetch("/api/analyze", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                org_id: "ORG001",
+                jurisdiction: s.state,
+                period_start: "2026-01-01",
+                period_end: "2026-03-31",
+                tax_collected: s.revenue * 0.1, // placeholder
+                tax_remitted: s.revenue * 0.08, // placeholder
+                total_sales: s.revenue,
+                transaction_count: 50, // placeholder
+              }),
             });
-          }
-        });
 
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+            const data = await res.json();
+
+            // Determine status from backend issues/warnings
+            let status: "Active" | "Approaching" | "Safe" | "Error" = "Safe";
+            if (data.issues && data.issues.length > 0) status = "Active";
+            else if (data.warnings && data.warnings.length > 0) status = "Approaching";
+
+            return { ...s, status };
+          } catch (err) {
+            return { ...s, status: "Error" };
+          }
+        })
+      );
+
+      setNexusStates(updatedStates);
     }
 
-    fetchNexusData();
-  }, [addNotification]);
-
-  // Loading state
-  if (loading) return <div>Loading Sales Tax Data...</div>;
+    fetchStatus();
+  }, []);
 
   return (
     <div className="space-y-8">
@@ -53,8 +63,8 @@ export default function SalesTax() {
 
       <div className="grid grid-cols-3 gap-6">
         <Card label="Tax Collected (YTD)" value="$42,390" />
-        <Card label="Active Jurisdictions" value={nexusStates.filter(s => s.status === "Active").length.toString()} />
-        <Card label="Pending Filings" value={nexusStates.filter(s => s.status === "Approaching").length.toString()} />
+        <Card label="Active Jurisdictions" value="14" />
+        <Card label="Pending Filings" value="3" />
       </div>
 
       <div className="bg-[#161a22] rounded-2xl border border-zinc-800 overflow-hidden">
@@ -76,11 +86,17 @@ export default function SalesTax() {
                 <td className="px-6 py-4 text-white font-medium">{item.state}</td>
                 <td className="px-6 py-4 text-zinc-300">${item.revenue.toLocaleString()}</td>
                 <td className="px-6 py-4">
-                  <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
-                    item.status === 'Active' ? 'bg-rose-500/20 text-rose-400' :
-                    item.status === 'Approaching' ? 'bg-amber-500/20 text-amber-400' :
-                    'bg-zinc-800 text-zinc-400'
-                  }`}>
+                  <span
+                    className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
+                      item.status === "Active"
+                        ? "bg-rose-500/20 text-rose-400"
+                        : item.status === "Approaching"
+                        ? "bg-amber-500/20 text-amber-400"
+                        : item.status === "Safe"
+                        ? "bg-zinc-800 text-zinc-400"
+                        : "bg-red-600/20 text-red-500"
+                    }`}
+                  >
                     {item.status}
                   </span>
                 </td>
