@@ -28,7 +28,7 @@ def analyze_tax(
         tax_collected=tax_collected,
         tax_remitted=tax_remitted,
         total_sales=total_sales,
-        transaction_cout=transaction_count
+        transaction_count=transaction_count
     )
 
     under_remit_issue = analyze_sales_tax(record)
