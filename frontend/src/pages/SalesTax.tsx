@@ -1,125 +1,69 @@
-import { create } from "zustand";
+import { Card } from "../components/Card";
 
-type ExecutiveMode = 'CEO' | 'CFO' | 'COO' | 'Risk';
+export default function SalesTax() {
+  // Hardcoded revenue & thresholds
+  const nexusStates = [
+    { state: "California", revenue: 120000, threshold: 100000 },
+    { state: "New York", revenue: 85000, threshold: 100000 },
+    { state: "Texas", revenue: 480000, threshold: 500000 }, 
+  ];
 
-export interface Notification {
-  id: string;
-  type: 'CRITICAL' | 'INFO';
-  message: string;
-  timestamp: Date;
+  // Calculate status dynamically
+  const calculatedStates = nexusStates.map((item) => {
+    let status: "Active" | "Approaching" | "Safe";
+    if (item.revenue >= item.threshold) status = "Active";
+    else if (item.revenue >= item.threshold * 0.9) status = "Approaching";
+    else status = "Safe";
+
+    return { ...item, status };
+  });
+
+  return (
+    <div className="space-y-8">
+      <h1 className="text-3xl font-semibold">Sales Tax & Nexus</h1>
+
+      <div className="grid grid-cols-3 gap-6">
+        <Card label="Tax Collected (YTD)" value="$42,390" />
+        <Card label="Active Jurisdictions" value="14" />
+        <Card label="Pending Filings" value="3" />
+      </div>
+
+      <div className="bg-[#161a22] rounded-2xl border border-zinc-800 overflow-hidden">
+        <div className="p-6 border-b border-zinc-800">
+          <h2 className="text-lg font-medium">Nexus Watchlist</h2>
+          <p className="text-sm text-zinc-400">States approaching economic tax thresholds</p>
+        </div>
+        <table className="w-full text-left">
+          <thead>
+            <tr className="text-xs text-zinc-500 uppercase border-b border-zinc-800">
+              <th className="px-6 py-4">State</th>
+              <th className="px-6 py-4">Revenue</th>
+              <th className="px-6 py-4">Status</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-zinc-800">
+            {calculatedStates.map((item) => (
+              <tr key={item.state} className="text-sm">
+                <td className="px-6 py-4 text-white font-medium">{item.state}</td>
+                <td className="px-6 py-4 text-zinc-300">${item.revenue.toLocaleString()}</td>
+                <td className="px-6 py-4">
+                  <span
+                    className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
+                      item.status === "Active"
+                        ? "bg-rose-500/20 text-rose-400"
+                        : item.status === "Approaching"
+                        ? "bg-amber-500/20 text-amber-400"
+                        : "bg-zinc-800 text-zinc-400"
+                    }`}
+                  >
+                    {item.status}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 }
-
-interface FinancialState {
-  // Theme State
-  theme: 'dark' | 'light';
-  toggleTheme: () => void;
-
-  // Real Data State
-  revenue: number;
-  payrollRatio: number;
-  otherBurn: number;
-  isLoading: boolean;
-  error: string | null;
-
-  // Simulation State
-  isSimulationMode: boolean;
-  simulatedRevenue: number;
-  simulatedPayrollRatio: number;
-  simulatedOtherBurn: number;
-  viewMode: ExecutiveMode;
-
-  // Notification State
-  notifications: Notification[];
-  addNotification: (n: Omit<Notification, 'timestamp'>) => void;
-  removeNotification: (id: string) => void;
-  clearNotifications: () => void;
-
-  // Setters & Actions
-  setRevenue: (n: number) => void;
-  setSimulatedRevenue: (n: number) => void;
-  setSimulatedPayrollRatio: (n: number) => void;
-  setViewMode: (mode: ExecutiveMode) => void;
-  toggleSimulation: () => void;
-  resetToLive: () => void;
-  fetchFinancials: () => Promise<void>;
-  triggerShock: () => void;
-  
-  // Mitigation Action
-  executeMitigation: (id: string) => void;
-}
-
-export const useFinancialStore = create<FinancialState>((set) => ({
-  // Initial Theme State
-  theme: 'dark',
-  toggleTheme: () => set((state) => ({ 
-    theme: state.theme === 'dark' ? 'light' : 'dark' 
-  })),
-
-  // Initial Financial State
-  revenue: 200000,
-  payrollRatio: 0.35,
-  otherBurn: 50000,
-  isLoading: false,
-  error: null,
-  isSimulationMode: false,
-  simulatedRevenue: 200000,
-  simulatedPayrollRatio: 0.35,
-  simulatedOtherBurn: 50000,
-  viewMode: 'CEO',
-
-  // Notifications Implementation
-  notifications: [],
-  addNotification: (n) => set((state) => ({ 
-    notifications: [{ ...n, timestamp: new Date() }, ...state.notifications].slice(0, 5) 
-  })),
-  removeNotification: (id) => set((state) => ({ 
-    notifications: state.notifications.filter(nt => nt.id !== id) 
-  })),
-  clearNotifications: () => set({ notifications: [] }),
-
-  // Actions
-  setRevenue: (n) => set({ revenue: n }),
-  setSimulatedRevenue: (n) => set({ simulatedRevenue: n }),
-  setSimulatedPayrollRatio: (n) => set({ simulatedPayrollRatio: n }),
-  setViewMode: (mode) => set({ viewMode: mode }),
-  toggleSimulation: () => set((state) => ({ isSimulationMode: !state.isSimulationMode })),
-  
-  triggerShock: () => set((state) => ({
-    isSimulationMode: true,
-    simulatedRevenue: state.revenue * 0.5,
-    viewMode: 'Risk' 
-  })),
-
-  // Mitigation Logic: Resets revenue and moves view to Risk to assess impact
-  executeMitigation: (id) => {
-    set((state) => ({
-      simulatedRevenue: state.revenue,
-      viewMode: 'CFO', // Move to CFO to review capital
-      notifications: state.notifications.filter(nt => nt.id !== id)
-    }));
-  },
-
-  resetToLive: () => set((state) => ({
-    simulatedRevenue: state.revenue,
-    simulatedPayrollRatio: state.payrollRatio,
-    simulatedOtherBurn: state.otherBurn,
-    isSimulationMode: false
-  })),
-
-  fetchFinancials: async () => {
-    set({ isLoading: true, error: null });
-    try {
-      const response = await fetch('/api/financials');
-      if (!response.ok) throw new Error(`Gateway Error: ${response.status}`);
-      const data = await response.json();
-      set({ 
-        revenue: data.revenue ?? 200000,
-        payrollRatio: data.payrollRatio ?? 0.35,
-        otherBurn: data.otherBurn ?? 50000,
-        isLoading: false 
-      });
-    } catch (err: any) {
-      set({ error: "Sync unavailable. Using local cache.", isLoading: false });
-    }
-  },
-}));
