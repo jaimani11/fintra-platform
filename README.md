@@ -1,49 +1,31 @@
-## Overview
-Fintra is a modular financial operating system with an AI Chief of Staff.
+# Fintra Platform (FintraOS + AgencyOS)
 
-## Architecture
-- platform-core: identity, licensing, governance
-- agencyos: decision intelligence
-- modules: payroll, sales tax, accounting, etc.
-- frontend: unified portal
+Fintra is an AI-native operating system for small and mid-sized businesses.
 
-## How Students Use This Repo
-- You are NOT expected to build everything
-- Focus on testing, extending logic, or improving one module
-- The platform is already wired end-to-end
+This repository contains:
+- **Platform Core**: identity, orgs, licensing, billing, audit
+- **AgencyOS**: AI Chief of Staff (decision preparation & execution)
+- **Modules**: payroll, accounting, budgeting, sales tax, commissions, expenses
+- **Frontend Portal**: unified admin center (Adobe/Microsoft-style)
+- **Contracts**: API + event schemas
+- **Testing**: deterministic scenarios for student validation
 
-## Getting Started
-1. Clone repo
-2. Install dependencies
-3. Run frontend + services
-4. Run tests in /testing
+## Important
+This is a **production-grade platform baseline**.
 
-## What to Explore
-- Cross-module intelligence
-- ROI calculations
-- Governance mode
-- Decision explanations
+Students should:
+- extend modules
+- integrate APIs
+- add intelligence
+- test workflows
 
+Students should NOT:
+- redesign auth
+- remove approval loops
+- bypass audit or governance layers
 
-cd platform-core
-source venv/bin/activate (skip if no venv)
-pip install -r requirements.txt
-pip install fastapi uvicorn
-uvicorn main:app --reload
-http://127.0.0.1:8000/docs
+## Philosophy
+> Users don’t want more dashboards.  
+> They want to know what needs attention.
 
-
-
-cd frontend
-npm install
-npm install recharts
-npm install jspdf
-npm install zustand
-npm install zustand recharts react-router-dom
-npm install react-router-dom
-chmod +x node_modules/.bin/vite
-npm run dev
-
-Local: http://localhost:5173
-
-
+That is the role of AgencyOS.
