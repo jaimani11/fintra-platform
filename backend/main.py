@@ -38,6 +38,23 @@ def compliance_limit(investor_type: str, amount: float):
 def compliance_signal(status: str = "non accredited", amount: float = 0.0):
     return compliance_limit(status, amount)
 # --------------------------------------------------
+# epic 7 story with the sales tax exposure stuff
+# --------------------------------------------------
+def sales_tax_exposure(state: str, revenue: float, transactions: int):
+    # nexus threshold placeholder
+    REVENUE_LIMIT = 100000.0
+    TRANSACTIONS_LIMIT = 200
+    close_to_limit = revenue >= (REVENUE_LIMIT * 0.75) or transactions >= (TRANSACTIONS_LIMIT * 0.75)
+    over_the_limit = revenue >= REVENUE_LIMIT or transactions >= TRANSACTIONS_LIMIT
+    if over_the_limit:
+        return {"status": "CRITICAL", "msg": f"nexus threshold past in {state}. Should check on that."}
+    elif close_to_limit:
+        return {"status": "WARNING", "msg": f"getting close ot nexus in {state}."}
+    return {"status": "CLEAR", "msg": "no tax exposure yet"}
+@app.get("/tax/exposure")
+def get_sales_tax_exposure(state: str = "AZ", revenue: float = 0.0, transactions: int = 0): # getting the alerts as an owner
+    return sales_tax_exposure(state, revenue, transactions)
+# --------------------------------------------------
 # Root Health Check
 # --------------------------------------------------
 
