@@ -31,14 +31,8 @@ class audit_service:
         timestamp = datetime.now().isoformat() # time of log
         combined_string = f"{timestamp}-{module}-{output}"
         id = hashlib.md5(combined_string.encode()).hexdigest()[:8] # keeping logs unique
-        new_log = {
-            "log_id": f"LOG-{id.upper()}",
-            "user": user_role,
-            "time": timestamp,
-            "module": module,      #artifact
-            "action": action_type,
-            "data": evidence,
-            "output": output
+        new_log = { #artifact
+            "log_id": f"LOG-{id.upper()}", "user": user_role, "time": timestamp, "module": module, "action": action_type, "data": evidence, "output": output
         }
         audit_database.append(new_log)
         return new_log
@@ -71,7 +65,11 @@ def sales_tax_exposure(state: str, revenue: float, transactions: int):
     return {"status": "CLEAR", "msg": "no tax exposure yet"}
 @app.get("/tax/exposure")
 def get_sales_tax_exposure(state: str = "AZ", revenue: float = 0.0, transactions: int = 0): # getting the alerts as an owner
-    return sales_tax_exposure(state, revenue, transactions)
+    data_output = sales_tax_exposure(state, revenue, transactions)
+    audit_service.logging_action( # triggering the logging
+        user_role="System", module="Sales Tax", action_type="Checking if nexus exposed or not", evidence={"revenue": revenue, "transactions": transactions, "state": state}, output=data+output["status"]
+    )
+    return data_output
 # --------------------------------------------------
 # Root Health Check
 # --------------------------------------------------
