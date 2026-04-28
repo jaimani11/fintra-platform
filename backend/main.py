@@ -25,8 +25,12 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://localhost:3000",
-        "https://opulent-parakeet-97j7grj67769hpp6-5173.app.github.dev",
-        "https://opulent-parakeet-97j7grj67769hpp6-8000.app.github.dev"
+        # Vercel frontend URL, will need to change if domain changes
+        "https://fyntraworks.com",
+        "https://www.fyntraworks.com",
+
+        # Vercel previews (for branches that are not main) 
+        "fintra-platform-git-alysa-fintra-hub.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
