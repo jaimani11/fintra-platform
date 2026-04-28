@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const BASE_URL = "https://opulent-parakeet-97j7grj67769hpp6-8000.app.github.dev";
+const BASE_URL = "https://fintra-platform.onrender.com";
 
 type SubDecision = {
   id: number;
