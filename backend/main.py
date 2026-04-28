@@ -6,7 +6,7 @@ import json
 import uuid
 
 # Import routers
-from decisions.routes import router as decisions_router
+from backend.decisions.routes import router as decisions_router
 
 # --------------------------------------------------
 # Create app
@@ -18,9 +18,16 @@ audit_database = [] # database mock for now to store logs
 # CORS Configuration
 # --------------------------------------------------
 
+
+# Temporary github connections, will change to proper Vercel/Render connections. 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://opulent-parakeet-97j7grj67769hpp6-5173.app.github.dev",
+        "https://opulent-parakeet-97j7grj67769hpp6-8000.app.github.dev"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

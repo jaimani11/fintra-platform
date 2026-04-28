@@ -1,27 +1,23 @@
-from fastapi import APIRouter, HTTPException, Depends, Request
-from pydantic import BaseModel, Field
-from typing import Optional, Literal, Dict
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from typing import Dict, List, Optional, Literal
 from datetime import datetime
-from uuid import uuid4
 
-router = APIRouter(
-    prefix="/api/decisions",
-    tags=["decisions"]
-)
+from agencyos.decision_engine.decision_generator import generate_decisions
+from backend.app.services.explanation_service import ExplanationService
 
-# -------------------------------------------------------------------
-# In-Memory Store (Replace with real DB layer later)
-# -------------------------------------------------------------------
+router = APIRouter(prefix="/api/decisions", tags=["decisions"])
 
 DECISIONS: Dict[int, dict] = {}
 
-# -------------------------------------------------------------------
-# Models
-# -------------------------------------------------------------------
+
+# -----------------------------
+# MODELS
+# -----------------------------
 
 class DecisionUpdate(BaseModel):
-    decision_id: int = Field(..., description="Unique decision ID")
-    status: Literal["approved", "deferred"]
+    decision_id: int
+    status: Literal["approved", "deferred", "pending"]
     approved_at: Optional[str] = None
     response_time_seconds: Optional[int] = None
 
@@ -32,94 +28,104 @@ class DecisionResponse(BaseModel):
     approved_at: Optional[str]
     response_time_seconds: Optional[int]
     updated_at: str
+    content: Optional[str] = None
+    priority_score: Optional[float] = None
+    explanation: Optional[str] = None
 
 
-# -------------------------------------------------------------------
-# Utility Validation
-# -------------------------------------------------------------------
-
-def parse_iso_timestamp(value: Optional[str]) -> Optional[datetime]:
-    if not value:
-        return None
-    try:
-        return datetime.fromisoformat(value)
-    except ValueError:
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid ISO timestamp format"
-        )
+class DecisionCreate(BaseModel):
+    prompt: str
+    modules: List[str] = []
+    revenue: float
+    payroll_ratio: float
+    other_burn: float
 
 
-# -------------------------------------------------------------------
-# Routes
-# -------------------------------------------------------------------
-
-@router.post("/update", response_model=DecisionResponse)
-def update_decision(payload: DecisionUpdate):
-    """
-    Update decision status.
-    Tracks response time and approval timestamp.
-    """
-
-    # Validate required approval timestamp
-    if payload.status == "approved" and not payload.approved_at:
-        raise HTTPException(
-            status_code=400,
-            detail="approved_at required when status is approved"
-        )
-
-    approved_at_dt = parse_iso_timestamp(payload.approved_at)
-
-    # Save (Replace this with DB persistence layer)
-    DECISIONS[payload.decision_id] = {
-        "decision_id": payload.decision_id,
-        "status": payload.status,
-        "approved_at": approved_at_dt.isoformat() if approved_at_dt else None,
-        "response_time_seconds": payload.response_time_seconds,
-        "updated_at": datetime.utcnow().isoformat(),
-    }
-
-    return DECISIONS[payload.decision_id]
+class ApprovePayload(BaseModel):
+    sub_decision_id: int
 
 
-@router.get("/{decision_id}", response_model=DecisionResponse)
+# -----------------------------
+# ROUTES
+# -----------------------------
+
+@router.get("/health")
+def health():
+    return {"status": "ok", "decision_count": len(DECISIONS)}
+
+
+@router.post("/generate")
+def generate_decision(payload: DecisionCreate):
+    decisions = generate_decisions(org_id="demo-org")
+
+    for i, d in enumerate(decisions):
+        d["decision_id"] = i + 1
+        d["status"] = "pending"
+        d["approved_sub_decision_id"] = None
+        d["denied_sub_decision_ids"] = []
+        d["updated_at"] = datetime.utcnow().isoformat()
+        DECISIONS[d["decision_id"]] = d
+
+    return decisions
+
+
+@router.get("/{decision_id}")
 def get_decision(decision_id: int):
-    """
-    Fetch a specific decision record.
-    """
     if decision_id not in DECISIONS:
-        raise HTTPException(status_code=404, detail="Decision not found")
-
+        raise HTTPException(status_code=404)
     return DECISIONS[decision_id]
-
-
-@router.get("/", response_model=Dict[int, DecisionResponse])
-def list_decisions():
-    """
-    Return all stored decisions.
-    """
-    return DECISIONS
 
 
 @router.delete("/{decision_id}")
 def delete_decision(decision_id: int):
-    """
-    Admin-only: Delete decision record.
-    """
     if decision_id not in DECISIONS:
-        raise HTTPException(status_code=404, detail="Decision not found")
-
+        raise HTTPException(status_code=404)
     del DECISIONS[decision_id]
     return {"success": True}
 
 
-@router.get("/health")
-def health_check():
-    """
-    Lightweight health endpoint.
-    """
+@router.patch("/{decision_id}/approve")
+def approve_decision(decision_id: int, payload: ApprovePayload):
+    if decision_id not in DECISIONS:
+        raise HTTPException(status_code=404, detail="Issue not found")
+
+    issue = DECISIONS[decision_id]
+
+    sub_ids = [s["id"] for s in issue.get("decisions", [])]
+    if payload.sub_decision_id not in sub_ids:
+        raise HTTPException(status_code=404, detail="Sub-decision not found")
+
+    issue["status"] = "approved"
+    issue["approved_sub_decision_id"] = payload.sub_decision_id
+    issue["updated_at"] = datetime.utcnow().isoformat()
+
     return {
-        "status": "ok",
-        "decision_count": len(DECISIONS),
-        "timestamp": datetime.utcnow().isoformat(),
+        "decision_id": decision_id,
+        "status": "approved",
+        "approved_sub_decision_id": payload.sub_decision_id,
+        "updated_at": issue["updated_at"],
+    }
+
+
+@router.patch("/{decision_id}/sub/{sub_id}/deny")
+def deny_sub_decision(decision_id: int, sub_id: int):
+    if decision_id not in DECISIONS:
+        raise HTTPException(status_code=404, detail="Issue not found")
+
+    issue = DECISIONS[decision_id]
+
+    sub_ids = [s["id"] for s in issue.get("decisions", [])]
+    if sub_id not in sub_ids:
+        raise HTTPException(status_code=404, detail="Sub-decision not found")
+
+    denied = issue.setdefault("denied_sub_decision_ids", [])
+    if sub_id not in denied:
+        denied.append(sub_id)
+
+    issue["updated_at"] = datetime.utcnow().isoformat()
+
+    return {
+        "decision_id": decision_id,
+        "denied_sub_decision_id": sub_id,
+        "updated_at": issue["updated_at"],
     }

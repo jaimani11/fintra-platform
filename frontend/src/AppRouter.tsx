@@ -5,7 +5,7 @@ import { AuthProvider } from "./auth/AuthContext";
 import { ProtectedRoute } from "./auth/ProtectedRoute";
 
 import MarketingLayout from "./MarketingLayout";
-import { App as PortalApp } from "./portal/App"; // keep if you still use it
+import { App as PortalApp } from "./portal/App";
 
 // Marketing pages
 import Home from "./Home";
@@ -29,22 +29,24 @@ import HumanResources from "./pages/HumanResources";
 import Compliance from "./pages/Compliance";
 import Security from "./pages/Security";
 import Settings from "./pages/Settings";
+import Inbox from "./pages/Inbox";
 
 export const AppRouter = () => {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+
           {/* ========================= */}
           {/* MARKETING SITE (PUBLIC)   */}
           {/* ========================= */}
-          <Route element={<MarketingLayout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/demo" element={<DemoConsole />} />
+          <Route path="/" element={<MarketingLayout />}>
+            <Route index element={<Home />} />
+            <Route path="products" element={<Products />} />
+            <Route path="pricing" element={<Pricing />} />
+            <Route path="about" element={<About />} />
+            <Route path="signup" element={<Signup />} />
+            <Route path="demo" element={<DemoConsole />} />
           </Route>
 
           {/* ========================= */}
@@ -62,8 +64,9 @@ export const AppRouter = () => {
             <Route index element={<Navigate to="dashboard" replace />} />
 
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="inbox" element={<Inbox />} />
 
-            {/* Core Finance */}
+            {/* Core Finance*/}
             <Route path="payroll" element={<Payroll />} />
             <Route path="accounting" element={<Accounting />} />
             <Route path="budgeting" element={<Budgeting />} />
@@ -80,7 +83,7 @@ export const AppRouter = () => {
             {/* System */}
             <Route path="settings" element={<Settings />} />
           </Route>
-
+          
           {/* ========================= */}
           {/* Legacy Portal (OPTIONAL)  */}
           {/* ========================= */}
@@ -94,7 +97,7 @@ export const AppRouter = () => {
             }
           />
 
-          {/* Fallback */}
+          {/* fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

@@ -25,11 +25,13 @@ Fintra is a modular financial operating system with an AI Chief of Staff.
 - Decision explanations
 
 
-cd platform-core
+(stay at root, /workspaces/fintra-platform)
+python -m venv venv
 source venv/bin/activate (skip if no venv)
 pip install -r requirements.txt
+pip install -e .
 pip install fastapi uvicorn
-uvicorn main:app --reload
+uvicorn backend.main:app --reload
 http://127.0.0.1:8000/docs
 
 
@@ -41,8 +43,10 @@ npm install jspdf
 npm install zustand
 npm install zustand recharts react-router-dom
 npm install react-router-dom
+chmod +x node_modules/.bin/vite
 npm run dev
 
 Local: http://localhost:5173
+
 
 
