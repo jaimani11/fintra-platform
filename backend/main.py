@@ -80,6 +80,12 @@ def get_trace_chain(trace_id: str):
     return {
         "trace_id": trace_id, "count_of_events": len(chain), "chain": chain #chain of events
     }
+@app.get("/governance/approvals")
+def get_approval_histoy():
+    approval = [log for log in audit_database if log["result"] in ["CRITICAL", "WARNING", "Red flag"]]
+    return {
+        "count_of_reviews": len(approval), "history": approval
+    }
 @app.get("/tax/exposure")
 def get_sales_tax_exposure(state: str = "AZ", revenue: float = 0.0, transactions: int = 0): # getting the alerts as an owner
     data_output = sales_tax_exposure(state, revenue, transactions)
