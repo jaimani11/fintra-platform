@@ -28,7 +28,7 @@ app.add_middleware(
 # audit service draft
 class audit_service:
     @staticmethod
-    def logging_action(user_role: str, action_type: str, module: str, evidence: dict, output: str):
+    def logging_action(user_role: str, action_type: str, module: str, evidence: dict, output: str, trace_id: str = None):
         timestamp = datetime.now().isoformat() # time of log
         trace = trace_id if trace_id else f"TRACE-{uuid.uuid4().hex[:6].upper()}" #the trace chain
         combined_string = f"{timestamp}-{module}-{output}"
@@ -51,10 +51,12 @@ def compliance_limit(investor_type: str, amount: float):
 @app.get("/compliance/signal")
 def compliance_signal(status: str = "non accredited", amount: float = 0.0):
     data_output = compliance_limit(status, amount)
-    audit_service.logging_action( #compliance signals logged
+    trace = audit_service.logging_action( #compliance signals logged
         user_role="System", module="Compliance", action_type="Checking limit of investor", evidence={"status": status, "amount": amount}, output=data_output["signal"]
     )
-    return data_output
+    return {
+        "data": data_output, "trace_id": trace
+    }
 # --------------------------------------------------
 # epic 7 story with the sales tax exposure stuff
 # --------------------------------------------------
