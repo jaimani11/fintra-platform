@@ -64,6 +64,7 @@ function ModuleTag({ module }: { module: string }) {
 }
 
 const RANK_LABELS: Record<number, string> = { 0: "1st", 1: "2nd", 2: "3rd", 3: "4th", 4: "5th" };
+const INITIAL_VISIBLE = 5;
 
 export default function Inbox() {
   const [decisions, setDecisions] = useState<Decision[]>([]);
