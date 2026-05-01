@@ -9,3 +9,6 @@ class SalesTaxRecord:
     period_end: date
     tax_collected: float
     tax_remitted: float
+    # Economic nexus fields
+    total_sales: float
+    transaction_count: int

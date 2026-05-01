@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from typing import Dict, List, Optional, Literal
 from datetime import datetime
 
-from agencyos.decision_engine.decision_generator import generate_decisions
+from agencyos.decision_engine.decision_generator import generate_issues, generate_decisions_for_issue
 from backend.app.services.explanation_service import ExplanationService
 
 router = APIRouter(prefix="/api/decisions", tags=["decisions"])
@@ -14,24 +14,6 @@ DECISIONS: Dict[int, dict] = {}
 # -----------------------------
 # MODELS
 # -----------------------------
-
-class DecisionUpdate(BaseModel):
-    decision_id: int
-    status: Literal["approved", "deferred", "pending"]
-    approved_at: Optional[str] = None
-    response_time_seconds: Optional[int] = None
-
-
-class DecisionResponse(BaseModel):
-    decision_id: int
-    status: str
-    approved_at: Optional[str]
-    response_time_seconds: Optional[int]
-    updated_at: str
-    content: Optional[str] = None
-    priority_score: Optional[float] = None
-    explanation: Optional[str] = None
-
 
 class DecisionCreate(BaseModel):
     prompt: str
@@ -56,17 +38,76 @@ def health():
 
 @router.post("/generate")
 def generate_decision(payload: DecisionCreate):
-    decisions = generate_decisions(org_id="demo-org")
+    global DECISIONS
+    DECISIONS.clear()
+
+    issues = generate_issues(org_id="demo-org")
+
+    for i, issue in enumerate(issues):
+        issue["decision_id"] = i + 1
+        issue["status"] = "pending"
+        issue["approved_sub_decision_id"] = None
+        issue["denied_sub_decision_ids"] = []
+        issue["decisions"] = []
+        issue["updated_at"] = datetime.utcnow().isoformat()
+        DECISIONS[issue["decision_id"]] = issue
+
+    return issues
+
+
+@router.post("/{decision_id}/decisions")
+def generate_decisions_for_issue_route(decision_id: int):
+    if decision_id not in DECISIONS:
+        raise HTTPException(status_code=404, detail="Issue not found")
+
+    issue = DECISIONS[decision_id]
+
+    if issue.get("decisions"):
+        return issue["decisions"]
+
+    signal = issue["signal_trace"] 
+
+    decisions = generate_decisions_for_issue(signal)
 
     for i, d in enumerate(decisions):
-        d["decision_id"] = i + 1
-        d["status"] = "pending"
-        d["approved_sub_decision_id"] = None
-        d["denied_sub_decision_ids"] = []
-        d["updated_at"] = datetime.utcnow().isoformat()
-        DECISIONS[d["decision_id"]] = d
+        d["id"] = i + 1
+
+    issue["decisions"] = decisions
+    issue["updated_at"] = datetime.utcnow().isoformat()
 
     return decisions
+
+@router.post("/{decision_id}/decisions/{sub_id}/explain")
+def explain_sub_decision(decision_id: int, sub_id: int):
+    """
+    Generates AI reasoning for one sub-decision on demand.
+    Called when user clicks 'View reasoning'.
+    """
+    if decision_id not in DECISIONS:
+        raise HTTPException(status_code=404, detail="Issue not found")
+
+    issue = DECISIONS[decision_id]
+    sub = next((d for d in issue.get("decisions", []) if d["id"] == sub_id), None)
+
+    if not sub:
+        raise HTTPException(status_code=404, detail="Sub-decision not found")
+
+    if sub.get("explanation"):
+        return {"explanation": sub["explanation"]}
+
+    explanation = ExplanationService.generate_explanation({
+        "content": sub["content"],
+        "modules": issue["modules"],
+        "signal_trace": issue["signal_trace"],
+        "impact_score": sub["impact_score"],
+        "urgency_score": sub["urgency_score"],
+        "confidence_score": sub["confidence_score"],
+        "roi": sub["roi"],
+        "cost_of_inaction_cents": issue["cost_of_inaction_cents"],
+    })
+
+    sub["explanation"] = explanation
+    return {"explanation": explanation}
 
 
 @router.get("/{decision_id}")

@@ -1,2 +1,10 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+.vite/
+
 venv/
 *.egg-info/

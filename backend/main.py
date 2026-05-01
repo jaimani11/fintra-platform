@@ -19,20 +19,25 @@ audit_database = [] # database mock for now to store logs
 # --------------------------------------------------
 
 
-# Temporary github connections, will change to proper Vercel/Render connections. 
+# This is commented out due to trouble getting it to connect, despite correct url and connections
+#app.add_middleware(
+#    CORSMiddleware,
+#    allow_origins=[
+#        "http://localhost:5173",
+#        "http://localhost:3000",
+#        "https://fyntraworks.com",
+#        "https://www.fyntraworks.com"
+#    ],
+#    allow_credentials=True,
+#    allow_methods=["*"],
+#    allow_headers=["*"],
+#)
+
+# This is the temporary solution to the above problem. It is NOT ideal for production. 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://localhost:3000",
-        # Vercel frontend URL, will need to change if domain changes
-        "https://fyntraworks.com",
-        "https://www.fyntraworks.com",
-
-        # Vercel previews (for branches that are not main) 
-        "fintra-platform-git-alysa-fintra-hub.vercel.app",
-    ],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )

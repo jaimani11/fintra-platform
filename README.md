@@ -31,6 +31,7 @@ source venv/bin/activate (skip if no venv)
 pip install -r requirements.txt
 pip install -e .
 pip install fastapi uvicorn
+export OPENAI_API_KEY="sk-[key]"
 uvicorn backend.main:app --reload
 http://127.0.0.1:8000/docs
 
