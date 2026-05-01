@@ -6,7 +6,7 @@ from app.services.policy_engine import PolicyEngine
 
 router = APIRouter()
 
-@router.post("/decision")
+@router.post("decision")
 def create_decision(
     payload: dict,
     db: Session = Depends(get_db)
@@ -21,7 +21,7 @@ def create_decision(
 
     decision = PolicyEngine.apply_policies(
         db,
-        payload["org_id"],
+        payload["org_id", "demo-org"],
         decision
     )
 

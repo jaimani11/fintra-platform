@@ -91,6 +91,7 @@ export default function Sidebar() {
           <NavLink to="/app/accounting" className={getLinkClass}>Accounting</NavLink>
           <NavLink to="/app/payroll" className={getLinkClass}>Payroll</NavLink>
           <NavLink to="/app/budgeting" className={getLinkClass}>Budgeting</NavLink>
+          <NavLink to="/app/inbox" className={getLinkClass}>Inbox</NavLink>
         </section>
 
         {/* GOVERNANCE - FULLY RESTORED */}

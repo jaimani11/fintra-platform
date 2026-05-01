@@ -23,6 +23,8 @@ export default function AppShell() {
   // Determine if we are on the main dashboard route to show the Executive View
   const isDashboard = location.pathname === "/app/dashboard";
 
+  const activeRoute = location.pathname;
+
   return (
     <div className={`flex h-screen overflow-hidden transition-colors duration-300 ${
       theme === 'dark' 

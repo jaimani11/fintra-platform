@@ -1,0 +1,7 @@
+[project]
+name = "fintra-platform"
+version = "0.1.0"
+dependencies = []
+
+[tool.setuptools]
+packages = ["backend", "agencyos"]

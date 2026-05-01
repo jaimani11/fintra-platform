@@ -6,7 +6,7 @@ import json
 import uuid
 
 # Import routers
-from decisions.routes import router as decisions_router
+from backend.decisions.routes import router as decisions_router
 
 # --------------------------------------------------
 # Create app
@@ -18,10 +18,26 @@ audit_database = [] # database mock for now to store logs
 # CORS Configuration
 # --------------------------------------------------
 
+
+# This is commented out due to trouble getting it to connect, despite correct url and connections
+#app.add_middleware(
+#    CORSMiddleware,
+#    allow_origins=[
+#        "http://localhost:5173",
+#        "http://localhost:3000",
+#        "https://fyntraworks.com",
+#        "https://www.fyntraworks.com"
+#    ],
+#    allow_credentials=True,
+#    allow_methods=["*"],
+#    allow_headers=["*"],
+#)
+
+# This is the temporary solution to the above problem. It is NOT ideal for production. 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
